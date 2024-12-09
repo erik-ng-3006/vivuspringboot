@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{shared/layout}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category detail</title>
+</head>
+<body>
+<section layout:fragment="content" class="manager">
+    <h1>Category manager</h1>
+    <h2 th:text="${category.name}"></h2>
+    <p th:text="${category.description}"></p>
+</section>
+</body>
+</html>
