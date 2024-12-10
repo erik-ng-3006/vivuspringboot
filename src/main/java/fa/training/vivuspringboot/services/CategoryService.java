@@ -45,17 +45,21 @@ public class CategoryService implements ICategoryService {
         return categories.stream().map(category -> new CategoryDTO(category.getId(), category.getName(), category.getDescription())).toList();
     }
 
+
     /**
-     * Retrieves a category by its unique identifier and converts it into a Data Transfer Object (DTO).
+     * Finds a category by its unique identifier and converts it to a CategoryDTO.
      *
-     * @param id the unique identifier of the category to be retrieved
-     * @return a CategoryDTO representing the category details, or null if no category is found
+     * @param id the UUID of the category to be retrieved
+     * @return the CategoryDTO object if found, or null if no category exists with the given UUID
      */
     @Override
     public CategoryDTO findById(UUID id) {
-        Category category = categoryRepository.findById(id).orElse(null);
+        return categoryRepository.findById(id)
+                .map(this::convertToDTO)
+                .orElse(null);
+    }
 
-        //convert to dto
+    private CategoryDTO convertToDTO(Category category) {
         CategoryDTO categoryDTO = new CategoryDTO();
         categoryDTO.setId(category.getId());
         categoryDTO.setName(category.getName());
