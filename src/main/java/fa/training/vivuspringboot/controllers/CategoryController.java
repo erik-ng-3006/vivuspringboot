@@ -72,6 +72,48 @@ public class CategoryController {
         }
     }
 
+    @GetMapping("/edit/{id}")
+    public String edit(
+            @PathVariable UUID id,
+            Model model) {
+        // Get category from db
+        var categoryCreateUpdateDTO = categoryService.findById(id);
+
+        // Passing to view to validate data
+        model.addAttribute("category", categoryCreateUpdateDTO);
+        return "manager/category/edit";
+    }
+
+    @PostMapping("/edit/{id}")
+    public String edit(
+            @PathVariable UUID id,
+            @ModelAttribute("category") @Valid CategoryCreateUpdateDTO categoryCreateUpdateDTO,
+            BindingResult bindingResult, RedirectAttributes redirectAttributes, Model model) {
+        // Validate data from form
+        if (bindingResult.hasErrors()) {
+            return "manager/category/create";
+        }
+
+        // Update category
+        CategoryDTO result = null;
+        try {
+            result = categoryService.update(id, categoryCreateUpdateDTO);
+        } catch (Exception e) {
+            // Passing error message to view creating
+            model.addAttribute("error", e.getMessage());
+            return "manager/category/edit";
+        }
+
+        if (result != null) {
+            // Redirect to index of categories with success message
+            redirectAttributes.addFlashAttribute("success", "Update category successfully");
+            return "redirect:/manager/category";
+        } else {
+            // Passing error message to view update
+            model.addAttribute("error", "Update category failed");
+            return "redirect:/manager/categories/edit";
+        }
+    }
 
     @GetMapping("/delete/{id}")
     public String delete(@PathVariable UUID id,
