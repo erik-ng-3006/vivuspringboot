@@ -12,18 +12,45 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Service class for managing categories. This class provides implementations
+ * for creating, updating, finding, and deleting categories.
+ * It acts as the business layer between the controller and the repository.
+ *
+ * Responsibilities:
+ * - Fetching all categories
+ * - Fetching a specific category by its id
+ * - Creating a new category
+ * - Updating an existing category
+ * - Deleting a category (soft delete or hard delete)
+ *
+ * The class is transactional, ensuring that all operations performed within
+ * a transaction scope either succeed collectively or fail collectively.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class CategoryService implements ICategoryService {
     private final ICategoryRepository categoryRepository;
 
+    /**
+     * Retrieves all categories and converts them into a list of CategoryDTO objects.
+     *
+     * @return a list of CategoryDTO objects containing the id, name, and description
+     *         of each category retrieved from the database.
+     */
     @Override
     public List<CategoryDTO> findAll() {
         List<Category> categories = categoryRepository.findAll();
         return categories.stream().map(category -> new CategoryDTO(category.getId(), category.getName(), category.getDescription())).toList();
     }
 
+    /**
+     * Retrieves a category by its unique identifier and converts it into a Data Transfer Object (DTO).
+     *
+     * @param id the unique identifier of the category to be retrieved
+     * @return a CategoryDTO representing the category details, or null if no category is found
+     */
     @Override
     public CategoryDTO findById(UUID id) {
         Category category = categoryRepository.findById(id).orElse(null);
@@ -36,6 +63,13 @@ public class CategoryService implements ICategoryService {
         return categoryDTO;
     }
 
+    /**
+     * Creates a new category based on the provided CategoryCreateUpdateDTO object.
+     *
+     * @param categoryCreateUpdateDTO the data transfer object containing the details of the category to be created
+     * @return a CategoryDTO object representing the newly created category
+     * @throws IllegalArgumentException if the provided CategoryCreateUpdateDTO is null or if the category name already exists
+     */
     @Override
     public CategoryDTO create(CategoryCreateUpdateDTO categoryCreateUpdateDTO) {
         if (categoryCreateUpdateDTO == null) {
@@ -64,6 +98,13 @@ public class CategoryService implements ICategoryService {
         return categoryDTO;
     }
 
+    /**
+     * Deletes the category with the specified ID.
+     *
+     * @param id the unique identifier of the category to be deleted
+     * @return true if the category was successfully deleted, false otherwise
+     * @throws IllegalArgumentException if the category with the specified ID is not found
+     */
     @Override
     public boolean delete(UUID id) {
         Category category = categoryRepository.findById(id).orElse(null);
@@ -76,6 +117,17 @@ public class CategoryService implements ICategoryService {
         return !categoryRepository.existsById(id);
     }
 
+    /**
+     * Deletes a category identified by its unique ID. The deletion can be a
+     * soft delete or a hard delete based on the provided isSoftDelete parameter.
+     *
+     * @param id the unique identifier of the category to be deleted
+     * @param isSoftDelete if true, performs a soft delete by marking the category
+     *                     as deleted; if false, performs a hard delete
+     * @return true if the deletion is successful, whether soft or hard
+     * @throws IllegalArgumentException if the category with the specified ID
+     *                                  is not found
+     */
     @Override
     public boolean delete(UUID id, boolean isSoftDelete) {
         Category category = categoryRepository.findById(id).orElse(null);
@@ -90,6 +142,17 @@ public class CategoryService implements ICategoryService {
         return delete(id);
     }
 
+    /**
+     * Updates the details of an existing category based on the provided data.
+     * Validates the inputs and ensures the category exists and the name is unique if updated.
+     *
+     * @param id the unique identifier of the category to update
+     * @param categoryCreateUpdateDTO the data transfer object containing the updated category details
+     * @return a CategoryDTO object containing the updated category details
+     * @throws IllegalArgumentException if the provided categoryCreateUpdateDTO is null
+     *                                  or if the category to update does not exist
+     *                                  or if the category name already exists for another category
+     */
     @Override
     public CategoryDTO update(UUID id, CategoryCreateUpdateDTO categoryCreateUpdateDTO) {
         // Check null object
