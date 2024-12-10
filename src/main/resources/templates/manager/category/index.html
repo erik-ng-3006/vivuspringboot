@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{shared/layout}">
+<html lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{shared/managerLayout}">
 
 <head>
     <meta charset="UTF-8">
@@ -27,13 +27,13 @@
                     <td th:text="${category.name}"></td>
                     <td th:text="${category.description}"></td>
                     <td>
-                        <div class="flex">
-                            <a th:href="@{/manager/categories/{id}(id=${category.id})}"
-                               class="btn btn-primary">Edit</a>
-                            <form th:action="@{/manager/categories/delete/{id}(id=${category.id})}"
-                                  method="post">
-                                <button type="submit" class="btn btn-danger">Delete</button>
-                            </form>
+                        <div class="flex space-x-3 justify-center">
+                            <a th:href="@{/manager/category/{id}(id=${category.id})}">
+                                <i class="fas fa-edit text-blue-500"></i>
+                            </a>
+                            <a th:href="@{/manager/category/{id}/delete(id=${category.id})}">
+                               <i class="fa-regular fa-trash-can text-red-500"></i>
+                            </a>
                         </div>
                     </td>
                 </tr>
