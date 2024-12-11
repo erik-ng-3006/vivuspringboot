@@ -77,10 +77,10 @@ public class CategoryController {
             @PathVariable UUID id,
             Model model) {
         // Get category from db
-        var categoryCreateUpdateDTO = categoryService.findById(id);
+        var categoryDTO = categoryService.findById(id);
 
         // Passing to view to validate data
-        model.addAttribute("category", categoryCreateUpdateDTO);
+        model.addAttribute("category", categoryDTO);
         return "manager/category/edit";
     }
 
@@ -91,7 +91,7 @@ public class CategoryController {
             BindingResult bindingResult, RedirectAttributes redirectAttributes, Model model) {
         // Validate data from form
         if (bindingResult.hasErrors()) {
-            return "manager/category/create";
+            return "manager/category/edit";
         }
 
         // Update category
@@ -101,6 +101,7 @@ public class CategoryController {
         } catch (Exception e) {
             // Passing error message to view creating
             model.addAttribute("error", e.getMessage());
+            model.addAttribute("category", categoryCreateUpdateDTO);
             return "manager/category/edit";
         }
 
@@ -111,7 +112,7 @@ public class CategoryController {
         } else {
             // Passing error message to view update
             model.addAttribute("error", "Update category failed");
-            return "redirect:/manager/categories/edit";
+            return "manager/category/edit";
         }
     }
 

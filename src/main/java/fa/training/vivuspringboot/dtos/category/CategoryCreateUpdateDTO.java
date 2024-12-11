@@ -5,8 +5,12 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
+import java.util.UUID;
+
 @Data
 public class CategoryCreateUpdateDTO {
+    private UUID id;
+
     @NotBlank(message = "Category name is required")
     @Length(min = 2, max = 255, message = "Category name must be between 2 and 255 characters")
     private String name;
