@@ -133,12 +133,11 @@ public class CategoryController {
             // Redirect to index of categories
             redirectAttributes.addFlashAttribute("success",
                     "Delete category successfully");
-            return "redirect:/manager/category";
         } else {
             // Passing error message to index
             redirectAttributes.addFlashAttribute("error",
                     "Delete category failed");
-            return "redirect:/manager/category";
         }
+        return "redirect:/manager/category";
     }
 }
