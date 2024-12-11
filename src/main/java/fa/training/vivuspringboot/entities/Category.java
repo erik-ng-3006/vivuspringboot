@@ -1,19 +1,13 @@
 package fa.training.vivuspringboot.entities;
 
-import java.time.ZonedDateTime;
+import java.util.Set;
 import java.util.UUID;
 
 import jakarta.persistence.*;
-import lombok.*;
-import org.hibernate.annotations.TimeZoneStorage;
 
-@Data
 @Entity
 @Table(name = "categories")
-public class Category {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+public class Category extends MasterEntity {
 
     @Column(unique = true, nullable = false, columnDefinition = "NVARCHAR(255)")
     private String name;
@@ -21,18 +15,46 @@ public class Category {
     @Column(columnDefinition = "NVARCHAR(500)")
     private String description;
 
-    @TimeZoneStorage
-    @Column(nullable = false, columnDefinition = "DATETIMEOFFSET")
-    private ZonedDateTime insertedAt;
+    @OneToMany(mappedBy = "category")
+    private Set<Product> products;
 
-    @TimeZoneStorage
-    @Column(nullable = false, columnDefinition = "DATETIMEOFFSET")
-    private ZonedDateTime updatedAt;
+    public String getName() {
+        return name;
+    }
 
-    @TimeZoneStorage
-    @Column(columnDefinition = "DATETIMEOFFSET")
-    private ZonedDateTime deletedAt;
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    @Column(nullable = false)
-    private boolean active;
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Set<Product> getProducts() {
+        return products;
+    }
+
+    public void setProducts(Set<Product> products) {
+        this.products = products;
+    }
+
+    public Category() {
+    }
+
+    public Category(String name, String description, Set<Product> products) {
+        this.name = name;
+        this.description = description;
+        this.products = products;
+    }
+
+    public Category(UUID id, String name, String description, Set<Product> products) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.products = products;
+    }
 }
