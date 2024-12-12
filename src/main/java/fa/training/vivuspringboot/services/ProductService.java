@@ -56,6 +56,8 @@ public class ProductService implements IProductService {
         productDTO.setId(product.getId());
         productDTO.setName(product.getName());
         productDTO.setDescription(product.getDescription());
+        productDTO.setPrice(product.getPrice());
+        productDTO.setStock(product.getStock());
         // Lay them thong tin category ma product do thuoc ve
         if (product.getCategory() != null) {
             var categoryDTO = new CategoryDTO();
@@ -88,6 +90,8 @@ public class ProductService implements IProductService {
         product.setName(productCreateUpdateDTO.getName());
         product.setDescription(productCreateUpdateDTO.getDescription());
         product.setActive(productCreateUpdateDTO.isActive());
+        product.setPrice(productCreateUpdateDTO.getPrice());
+        product.setStock(productCreateUpdateDTO.getStock());
         product.setInsertedAt(ZonedDateTime.now());
         product.setCategory(existingCategory);
         // Save to database
@@ -133,6 +137,8 @@ public class ProductService implements IProductService {
         existingProduct.setName(productCreateUpdateDTO.getName());
         existingProduct.setDescription(productCreateUpdateDTO.getDescription());
         existingProduct.setActive(productCreateUpdateDTO.isActive());
+        existingProduct.setPrice(productCreateUpdateDTO.getPrice());
+        existingProduct.setStock(productCreateUpdateDTO.getStock());
         existingProduct.setUpdatedAt(ZonedDateTime.now());
         existingProduct.setCategory(existingCategory);
         // Save to database
@@ -143,6 +149,8 @@ public class ProductService implements IProductService {
         productDTO.setId(updatedProduct.getId());
         productDTO.setName(updatedProduct.getName());
         productDTO.setDescription(updatedProduct.getDescription());
+        productDTO.setPrice(updatedProduct.getPrice());
+        productDTO.setStock(updatedProduct.getStock());
         // Lay them thong tin category ma product do thuoc ve
         if (updatedProduct.getCategory() != null) {
             var categoryDTO = new CategoryDTO();
