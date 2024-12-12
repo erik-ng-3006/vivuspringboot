@@ -4,8 +4,12 @@ import fa.training.vivuspringboot.dtos.category.CategoryCreateUpdateDTO;
 import fa.training.vivuspringboot.dtos.category.CategoryDTO;
 import fa.training.vivuspringboot.entities.Category;
 import fa.training.vivuspringboot.repositories.ICategoryRepository;
+import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.ZonedDateTime;
@@ -57,6 +61,35 @@ public class CategoryService implements ICategoryService {
         return categoryRepository.findById(id)
                 .map(this::convertToDTO)
                 .orElse(null);
+    }
+
+    /**
+     * Searches for all categories whose name or description contains the specified keyword.
+     * The search is case-insensitive and matches substrings.
+     *
+     * @param keyword the search keyword to filter categories by name or description
+     * @return a list of CategoryDTO objects that match the search criteria
+     */
+    @Override
+    public Page<CategoryDTO> searchAll(String keyword , Pageable pageable) {
+        if (keyword == null) {
+            return null;
+        }
+        Specification<Category> specification = (root, query, criteriaBuilder) -> {
+            //name like %keyword%
+            Predicate namePredicate = criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), "%" + keyword.toLowerCase() + "%");
+            //description like %keyword%
+            Predicate descriptionPredicate = criteriaBuilder.like(criteriaBuilder.lower(root.get("description")), "%" + keyword.toLowerCase() + "%");
+
+            //name or description like %keyword%
+            return criteriaBuilder.or(namePredicate, descriptionPredicate);
+        };
+
+        //get all categories
+        Page<Category> categories = categoryRepository.findAll(specification, pageable);
+
+        //convert to CategoryDTO and return
+        return categories.map(this::convertToDTO);
     }
 
     private CategoryDTO convertToDTO(Category category) {
