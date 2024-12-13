@@ -1,9 +1,15 @@
 package fa.training.vivuspringboot.services;
+
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 
 import fa.training.vivuspringboot.dtos.category.CategoryDTO;
+import fa.training.vivuspringboot.entities.Category;
+import jakarta.persistence.criteria.Predicate;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import fa.training.vivuspringboot.dtos.product.ProductCreateUpdateDTO;
@@ -17,11 +23,13 @@ import fa.training.vivuspringboot.repositories.ICategoryRepository;
 public class ProductService implements IProductService {
     private final IProductRepository productRepository;
     private final ICategoryRepository categoryRepository;
+
     public ProductService(IProductRepository productRepository,
                           ICategoryRepository categoryRepository) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
     }
+
     @Override
     public List<ProductDTO> findAll() {
         // Get all product entities
@@ -45,6 +53,7 @@ public class ProductService implements IProductService {
             return productDTO;
         }).toList();
     }
+
     @Override
     public ProductDTO findById(UUID id) {
         var product = productRepository.findById(id).orElse(null);
@@ -69,6 +78,47 @@ public class ProductService implements IProductService {
         // Return dto
         return productDTO;
     }
+
+    @Override
+    public Page<ProductDTO> searchAll(String keyword, Pageable pageable) {
+        if (keyword == null) {
+            return null;
+        }
+        Specification<Product> specification = (root, query, criteriaBuilder) -> {
+            //name like %keyword%
+            Predicate namePredicate = criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), "%" + keyword.toLowerCase() + "%");
+            //description like %keyword%
+            Predicate descriptionPredicate = criteriaBuilder.like(criteriaBuilder.lower(root.get("description")), "%" + keyword.toLowerCase() + "%");
+
+            //name or description like %keyword%
+            return criteriaBuilder.or(namePredicate, descriptionPredicate);
+        };
+
+        //get all products
+        Page<Product> products = productRepository.findAll(specification, pageable);
+
+        //convert to  and return
+        return products.map(item -> {
+            var productDTO = new ProductDTO();
+            productDTO.setId(item.getId());
+            productDTO.setName(item.getName());
+            productDTO.setDescription(item.getDescription());
+            productDTO.setStock(item.getStock());
+            productDTO.setPrice(item.getPrice());
+
+            if (item.getCategory() != null) {
+                var categoryDTO = new CategoryDTO();
+                categoryDTO.setId(item.getCategory().getId());
+                categoryDTO.setName(item.getCategory().getName());
+                categoryDTO.setDescription(item.getCategory().getDescription());
+                productDTO.setCategory(categoryDTO);
+            }
+            return productDTO;
+        });
+
+
+    }
+
     @Override
     public ProductDTO create(ProductCreateUpdateDTO productCreateUpdateDTO) {
         // Check null object
@@ -82,7 +132,7 @@ public class ProductService implements IProductService {
         }
         // Check if category exist with categoryId
         var existingCategory = categoryRepository.findById(productCreateUpdateDTO.getCategoryId()).orElse(null);
-        if(existingCategory == null){
+        if (existingCategory == null) {
             throw new IllegalArgumentException("Category not existed");
         }
         // Convert to product
@@ -112,6 +162,7 @@ public class ProductService implements IProductService {
         // Return dto
         return productDTO;
     }
+
     @Override
     public ProductDTO update(UUID id, ProductCreateUpdateDTO productCreateUpdateDTO) {
         // Check null object
@@ -130,7 +181,7 @@ public class ProductService implements IProductService {
         }
         // Check if category exist with categoryId
         var existingCategory = categoryRepository.findById(productCreateUpdateDTO.getCategoryId()).orElse(null);
-        if(existingCategory == null){
+        if (existingCategory == null) {
             throw new IllegalArgumentException("Category not existed");
         }
         // Convert to product to update
@@ -162,6 +213,7 @@ public class ProductService implements IProductService {
         // Return dto
         return productDTO;
     }
+
     @Override
     public boolean delete(UUID id) {
         var existingProduct = productRepository.findById(id).orElse(null);
@@ -172,6 +224,7 @@ public class ProductService implements IProductService {
         var result = productRepository.existsById(id);
         return !result;
     }
+
     @Override
     public boolean delete(UUID id, boolean isSoftDelete) {
         var existingProduct = productRepository.findById(id).orElse(null);

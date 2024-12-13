@@ -6,17 +6,28 @@ import fa.training.vivuspringboot.dtos.product.ProductDTO;
 import fa.training.vivuspringboot.services.ICategoryService;
 import fa.training.vivuspringboot.services.IProductService;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Controller
 @RequestMapping("/manager/product")
 public class ProductController {
+    @Value("${spring.data.web.pageable.pageLimit}")
+    private Integer pageLimit;
+
     private final IProductService productService;
     private final ICategoryService categoryService;
 
@@ -25,10 +36,67 @@ public class ProductController {
         this.categoryService = categoryService;
     }
 
+    /**
+     * Handles GET requests to display a paginated list of products with search capabilities.
+     *
+     * @param keyword The search keyword to filter the product list (default is an empty string meaning no filter).
+     * @param page The current page number for pagination (default is 0, representing the first page).
+     * @param size The number of items to display per page (default is 10).
+     * @param sortBy The field by which the product list should be sorted (default is "name").
+     * @param order The sorting order: "asc" for ascending or "desc" for descending (default is "asc").
+     * @param model The Model object used to add attributes to the view.
+     * @return The name of the view template to display the product list ("manager/product/index").
+     */
     @GetMapping
-    public String findAll(Model model) {
-        var products = productService.findAll();
-        model.addAttribute("products", products);
+    public String index(
+            @RequestParam(name = "keyword", required = false, defaultValue = "") String keyword,
+            @RequestParam(name = "page", required = false, defaultValue = "0") int page,
+            @RequestParam(name = "size", required = false, defaultValue = "10") int size,
+            @RequestParam(name = "sortBy", required = false, defaultValue = "name") String sortBy,
+            @RequestParam(name = "order", required = false, defaultValue = "asc") String order,
+            Model model) {
+
+        Pageable pageable = null;
+
+        // Create a Pageable object based on the provided page, size, sortBy, and order
+        if (order.equals("asc")) {
+            pageable = PageRequest.of(page, size, Sort.by(sortBy).ascending());
+        } else {
+            pageable = PageRequest.of(page, size, Sort.by(sortBy).descending());
+        }
+
+        // Get the paginated list of products
+        Page<ProductDTO> products = productService.searchAll(keyword, pageable);
+
+        // Add all attributes to the model
+        model.addAttribute("products", products.getContent());
+        model.addAttribute("totalPages", products.getTotalPages());
+        model.addAttribute("totalElements", products.getTotalElements());
+        model.addAttribute("isShow", true);
+        model.addAttribute("currentKeyword", keyword);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("currentSize", size);
+        model.addAttribute("sortBy", sortBy);
+        model.addAttribute("order", order);
+
+        // Calculate the page numbers
+        List<Integer> pageNumbers = IntStream
+                .range(Math.max(page - pageLimit, 0), Math.min(page + pageLimit + 1, products.getTotalPages()))
+                .boxed()
+                .toList();
+
+        // Add the page numbers to the model
+        model.addAttribute("pageNumbers", pageNumbers);
+
+        // Calculate the page info
+        String pageInfo = String.format("%d - %d of %d items",
+                Math.min(page * size + 1, products.getTotalElements()),
+                Math.min((page + 1) * size, products.getTotalElements()), products.getTotalElements());
+
+        // Add the page info to the model
+        model.addAttribute("pageInfo", pageInfo);
+
+        // Return the name of the view template
         return "manager/product/index";
     }
 

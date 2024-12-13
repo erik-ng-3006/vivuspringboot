@@ -20,11 +20,12 @@
                 <p th:text="${success}" class="text-green-500"></p>
             </div>
         </div>
-        <form th:action=" @{/manager/product}">
+        <form th:action=" @{/manager/product?keyword=${currentKeyword}}">
             <div class="card-body p-3 border-y border-slate-300 flex space-x-3">
                 <div class="form-group mb-3 w-full">
                     <label for="keyword" class="block mb-2">Keyword</label>
                     <input type="text" name="keyword" id="keyword" placeholder="Enter keyword"
+                           th:value="${currentKeyword}"
                            class="w-full border border-slate-300 p-2 rounded-md">
                 </div>
             </div>
@@ -49,8 +50,24 @@
         <table class="w-full">
             <thead>
             <tr class="*:border *:border-slate-300 *:p-2 bg-slate-100">
-                <th>Name</th>
-                <th>Description</th>
+                <th>
+                    <a th:href="@{'/manager/product?&keyword=' + ${currentKeyword} + '&sortBy=name&order=' + (${order == 'asc'} ? 'desc' : 'asc') + '&page=' + ${currentPage} + '&size=' + ${currentSize}}">
+                        <span>Name</span>
+                        <i th:if="${sortBy == 'name'}"
+                           th:class="${order == 'asc'} ? 'fa-solid fa-arrow-up' : 'fa-solid fa-arrow-down'"
+                           class="text-blue-500">
+                        </i>
+                    </a>
+                </th>
+                <th>
+                    <a th:href="@{'/manager/product?&keyword=' + ${currentKeyword} + '&sortBy=description&order=' + (${order == 'asc'} ? 'desc' : 'asc') + '&page=' + ${currentPage} + '&size=' + ${currentSize}}">
+                        <span>Description</span>
+                        <i th:if="${sortBy == 'description'}"
+                           th:class="${order == 'asc'} ? 'fa-solid fa-arrow-up' : 'fa-solid fa-arrow-down'"
+                           class="text-blue-500">
+                        </i>
+                    </a>
+                </th>
                 <th>Price</th>
                 <th>Stock</th>
                 <th>Category</th>
@@ -80,8 +97,52 @@
             </tr>
             </tbody>
         </table>
-        <div class="card-footer">
-            Pagination
+        <div class="card-footer p-3 border-y border-slate-300 flex items-center justify-between">
+            <!-- Select page size -->
+            <div class ="flex items-center space-x-3 mx-2">
+                <label for="size" class="block">Items per page</label>
+                <select name="size" id="size"
+                        onchange="window.location.href = `?keyword=${document.getElementById('keyword').value}&page=0&size=${this.value}`"
+                        class="border border-slate-300 p-2 rounded-md">
+                    <option value="2" th:selected="${currentSize == 2}">2</option>
+                    <option value="5" th:selected="${currentSize == 5}">5</option>
+                    <option value="10" th:selected="${currentSize == 10}">10</option>
+                    <option value="15" th:selected="${currentSize == 15}">15</option>
+                </select>
+            </div>
+            <!-- List Page -->
+            <div class="page-link flex space-x-2 *:block *:p-2 *:h-10 *:w-10
+                        *:rounded-full *:border *:border-blue-500 *:flex *:justify-center *:items-center">
+                <a th:href="@{/manager/product(keyword=${currentKeyword}, page=${0}, size=${currentSize})}"
+                   th:class="${currentPage == 0} ? 'pointer-events-none bg-blue-500 text-white' : 'hover:bg-blue-500 hover:text-white'">
+                    <i class="fas fa-angle-double-left"></i>
+                </a>
+                <a th:href="@{/manager/product(keyword=${currentKeyword}, page=${currentPage - 1}, size=${currentSize})}"
+                   th:class="${currentPage == 0} ? 'pointer-events-none' : 'hover:bg-blue-500 hover:text-white'">
+                    <i class="fas fa-angle-left"></i>
+                </a>
+                <a th:each="i : ${pageNumbers}"
+                   th:href="@{/manager/product(keyword=${currentKeyword}, page=${i}, size=${currentSize})}" th:text="${i + 1}"
+                   th:class="${currentPage == i} ? 'pointer-events-none bg-blue-500 text-white' : 'hover:bg-blue-500 hover:text-white'">
+
+                </a>
+                <a th:href="@{/manager/product(keyword=${currentKeyword}, page=${currentPage + 1}, size=${currentSize})}"
+                   th:class="${currentPage == totalPages - 1} ? 'pointer-events-none' : 'hover:bg-blue-500 hover:text-white'">
+                    <i class="fas fa-angle-right"></i>
+                </a>
+                <a th:href="@{/manager/product(keyword=${currentKeyword}, page=${totalPages - 1}, size=${currentSize})}"
+                   th:class="${currentPage == totalPages -1} ? 'pointer-events-none bg-blue-500 text-white' : 'hover:bg-blue-500 hover:text-white'">
+                    <i class="fas fa-angle-double-right"></i>
+                </a>
+            </div>
+            <!-- Page Info - (1-10 of 12 Items) -->
+            <div class="page-info flex items-center space-x-3 mx-2">
+                <span>Page</span>
+                <span th:text="${currentPage + 1}"></span>
+                <span>of</span>
+                <span th:text="${totalPages}"></span>
+                <span>Items</span>
+            </div>
         </div>
     </div>
 </section>

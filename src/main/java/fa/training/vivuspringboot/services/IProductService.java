@@ -1,8 +1,12 @@
 package fa.training.vivuspringboot.services;
 import java.util.List;
 import java.util.UUID;
+
+import fa.training.vivuspringboot.dtos.category.CategoryDTO;
 import fa.training.vivuspringboot.dtos.product.ProductCreateUpdateDTO;
 import fa.training.vivuspringboot.dtos.product.ProductDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface IProductService {
     /**
@@ -16,6 +20,15 @@ public interface IProductService {
      * @return ProductDTO by id
      */
     ProductDTO findById(UUID id);
+
+    /**
+     * Searches for all products that match the specified keyword and returns a paginated result.
+     *
+     * @param keyword The keyword to search for in the product list.
+     * @param pageable The pageable object defining the pagination and sorting information.
+     * @return A page of ProductDTO objects that match the search criteria.
+     */
+    Page<ProductDTO> searchAll(String keyword, Pageable pageable);
 
     /**
      * Create Product
