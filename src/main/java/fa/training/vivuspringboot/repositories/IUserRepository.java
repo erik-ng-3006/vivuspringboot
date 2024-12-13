@@ -8,4 +8,8 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 public interface IUserRepository extends JpaRepository<User, UUID>, JpaSpecificationExecutor<User> {
     User findByUsername(String username);
+
+    User findByPhoneNumber(String phoneNumber);
+
+    User findByUsernameOrPhoneNumber(String username, String phoneNumber);
 }

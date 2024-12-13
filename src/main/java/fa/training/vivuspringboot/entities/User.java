@@ -87,6 +87,10 @@ public class User extends MasterEntity {
         this.avatar = avatar;
     }
 
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
     public User() {
     }
 
